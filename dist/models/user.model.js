@@ -31,10 +31,6 @@ User.init({
         unique: true,
         allowNull: false,
     },
-    password: {
-        type: sequelize_1.DataTypes.STRING,
-        allowNull: true,
-    },
     pfp: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,

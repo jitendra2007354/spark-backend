@@ -12,12 +12,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.me = exports.adminLogin = exports.guestLogin = exports.login = void 0;
 const auth_service_1 = require("../services/auth.service");
 /**
- * Handles the /login request.
- * Creates a new user or logs in an existing user.
+ * Handles the /login request for both customers and drivers.
+ * It now accepts pre-formatted data from the frontends.
  */
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // Consolidate all body data into a single object for the service
-    const loginData = req.body;
+    // Destructure fields directly. The frontends now send data in the correct format.
+    const { phoneNumber, firstName, lastName, email, pfp, city, state, vehicleType, vehicleModel, vehicleNumber, driverLicenseNumber, driverLicensePhotoUrl, rcPhotoUrl, } = req.body;
+    // Consolidate the data for the service layer.
+    // The controller no longer needs to perform transformations like splitting 'name'
+    // or renaming 'mobile'.
+    const loginData = {
+        phoneNumber,
+        firstName,
+        lastName,
+        email,
+        pfp,
+        city,
+        state,
+        driverLicenseNumber,
+        driverLicensePhotoUrl,
+        vehicleModel,
+        vehicleNumber,
+        vehicleType,
+        rcPhotoUrl,
+    };
     try {
         const result = yield (0, auth_service_1.loginOrRegister)(loginData);
         res.status(200).json({
@@ -28,11 +46,11 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         console.error('Error in login controller:', error);
-        // Send a more specific error message to the client
         res.status(500).json({ error: 'Failed to login', message: error.message });
     }
 });
 exports.login = login;
+// --- OTHER AUTH FUNCTIONS (UNCHANGED) ---
 const guestLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield (0, auth_service_1.loginGuest)();

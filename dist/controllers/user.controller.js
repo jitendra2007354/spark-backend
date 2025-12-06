@@ -14,39 +14,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerUser = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
-// We need to hash passwords, so let's add bcrypt
-// Please run: npm install bcrypt @types/bcrypt
 /**
- * Register a new user
+ * Register a new user.
+ * This controller is simplified to not use passwords, aligning with the passwordless login flow.
  */
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { firstName, lastName, phoneNumber, password, userType } = req.body;
-        // 1. Validate input
-        if (!firstName || !lastName || !phoneNumber || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
+        const { firstName, lastName, phoneNumber, userType } = req.body;
+        // 1. Validate input (password is no longer required)
+        if (!firstName || !lastName || !phoneNumber) {
+            return res.status(400).json({ message: 'First name, last name, and phone number are required' });
         }
         // 2. Check if user already exists
         const existingUser = yield user_model_1.default.findOne({ where: { phoneNumber } });
         if (existingUser) {
             return res.status(409).json({ message: 'A user with this phone number already exists' });
         }
-        // 3. Hash the password for security
-        const salt = yield bcrypt_1.default.genSalt(10);
-        const hashedPassword = yield bcrypt_1.default.hash(password, salt);
-        // 4. Create the new user
+        // 3. Create the new user (without password)
         const newUser = yield user_model_1.default.create({
             firstName,
             lastName,
             phoneNumber,
-            userType: userType || 'Customer',
-            password: hashedPassword,
+            userType: userType || 'Customer', // Default to 'Customer' if not provided
         });
-        // 5. Respond with the created user (excluding password)
-        const userResponse = newUser.toJSON();
-        delete userResponse.password;
-        res.status(201).json(userResponse);
+        // 4. Respond with the created user
+        // The password field is gone, so no need to delete it from the response
+        res.status(201).json(newUser);
     }
     catch (error) {
         console.error('Error during user registration:', error);

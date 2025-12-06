@@ -4,12 +4,45 @@ import { loginOrRegister, loginGuest, loginAdmin } from '../services/auth.servic
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 /**
- * Handles the /login request.
- * Creates a new user or logs in an existing user.
+ * Handles the /login request for both customers and drivers.
+ * It now accepts pre-formatted data from the frontends.
  */
 export const login = async (req: Request, res: Response) => {
-  // Consolidate all body data into a single object for the service
-  const loginData = req.body;
+  // Destructure fields directly. The frontends now send data in the correct format.
+  const {
+    phoneNumber, 
+    firstName,
+    lastName,
+    email,
+    pfp,
+    city,
+    state,
+    vehicleType,
+    vehicleModel,
+    vehicleNumber,
+    driverLicenseNumber,
+    driverLicensePhotoUrl,
+    rcPhotoUrl,
+  } = req.body;
+
+  // Consolidate the data for the service layer.
+  // The controller no longer needs to perform transformations like splitting 'name'
+  // or renaming 'mobile'.
+  const loginData = {
+    phoneNumber,
+    firstName,
+    lastName,
+    email,
+    pfp,
+    city,
+    state,
+    driverLicenseNumber,
+    driverLicensePhotoUrl,
+    vehicleModel,
+    vehicleNumber,
+    vehicleType,
+    rcPhotoUrl,
+  };
 
   try {
     const result = await loginOrRegister(loginData);
@@ -20,10 +53,11 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error in login controller:', error);
-    // Send a more specific error message to the client
     res.status(500).json({ error: 'Failed to login', message: error.message });
   }
 };
+
+// --- OTHER AUTH FUNCTIONS (UNCHANGED) ---
 
 export const guestLogin = async (req: Request, res: Response) => {
     try {

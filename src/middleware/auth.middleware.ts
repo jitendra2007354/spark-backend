@@ -6,11 +6,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_default_secret';
 
 // Extend Express's Request interface to include the user property
 export interface AuthenticatedRequest extends Request {
-  user?: User;
+  user?: any; // Using any to accommodate both User model and admin object
 }
 
 /**
  * Middleware to verify JWT token and attach user to the request.
+ * This now handles the special case for the 'admin' user.
  */
 export const protect = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
@@ -21,8 +22,16 @@ export const protect = async (req: AuthenticatedRequest, res: Response, next: Ne
   }
 
   try {
-    const decoded = verify(token, JWT_SECRET) as { id: number };
-    const user = await User.findByPk(decoded.id);
+    const decoded = verify(token, JWT_SECRET) as { id: number | string, userType: string };
+
+    // SPECIAL CASE: Handle the admin user, whose ID is a string 'admin'
+    if (decoded.id === 'admin' && decoded.userType === 'Admin') {
+      req.user = { id: 'admin', userType: 'Admin' };
+      return next();
+    }
+
+    // STANDARD CASE: Handle regular users with numeric IDs from the database
+    const user = await User.findByPk(decoded.id as number);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

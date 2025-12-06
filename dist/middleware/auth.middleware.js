@@ -18,6 +18,7 @@ const user_model_1 = __importDefault(require("../models/user.model")); // Assumi
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_secret';
 /**
  * Middleware to verify JWT token and attach user to the request.
+ * This now handles the special case for the 'admin' user.
  */
 const protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers['authorization'];
@@ -27,6 +28,12 @@ const protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
     }
     try {
         const decoded = (0, jsonwebtoken_1.verify)(token, JWT_SECRET);
+        // SPECIAL CASE: Handle the admin user, whose ID is a string 'admin'
+        if (decoded.id === 'admin' && decoded.userType === 'Admin') {
+            req.user = { id: 'admin', userType: 'Admin' };
+            return next();
+        }
+        // STANDARD CASE: Handle regular users with numeric IDs from the database
         const user = yield user_model_1.default.findByPk(decoded.id);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
