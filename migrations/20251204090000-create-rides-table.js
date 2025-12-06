@@ -31,11 +31,11 @@ module.exports = {
         onDelete: 'SET NULL', // If driver is deleted, don't delete the ride history
       },
       pickupLocation: {
-        type: Sequelize.JSONB,
+        type: Sequelize.JSON,
         allowNull: false,
       },
       dropoffLocation: {
-        type: Sequelize.JSONB,
+        type: Sequelize.JSON,
         allowNull: false,
       },
       pickupAddress: {

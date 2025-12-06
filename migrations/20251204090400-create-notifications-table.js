@@ -39,7 +39,7 @@ module.exports = {
         defaultValue: 'general',
       },
       relatedData: {
-        type: Sequelize.JSONB,
+        type: Sequelize.JSON,
         allowNull: true,
       },
       createdAt: {
