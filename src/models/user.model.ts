@@ -8,7 +8,6 @@ interface UserAttributes {
   lastName: string;
   email?: string;
   phoneNumber: string;
-  password?: string;
   pfp?: string;
   city?: string;
   state?: string;
@@ -34,7 +33,6 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public lastName!: string;
   public email?: string;
   public phoneNumber!: string;
-  public password?: string;
   public pfp?: string;
   public city?: string;
   public state?: string;
@@ -78,10 +76,6 @@ User.init({
     type: DataTypes.STRING,
     unique: true,
     allowNull: false,
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: true,
   },
   pfp: {
     type: DataTypes.STRING,
