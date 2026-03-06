@@ -19,6 +19,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const http_1 = require("http");
 const fs_1 = __importDefault(require("fs")); // Import the file system module
 const path_1 = __importDefault(require("path")); // Import the path module
+const ioredis_1 = __importDefault(require("ioredis"));
 const database_service_1 = require("./services/database.service");
 const socket_1 = require("./socket");
 // --- Import Cron Services ---
@@ -78,6 +79,15 @@ app.use('/api/notifications', notification_routes_1.default);
 app.get('/api', (req, res) => {
     res.send('Hello from the backend!');
 });
+// --- Redis Initialization ---
+const redisUrl = process.env.REDIS_URL;
+if (redisUrl) {
+    const pub = new ioredis_1.default(redisUrl, { tls: { rejectUnauthorized: false } });
+    const sub = new ioredis_1.default(redisUrl, { tls: { rejectUnauthorized: false } });
+    pub.on('error', (err) => console.error('❌ Redis Pub Error:', err));
+    sub.on('error', (err) => console.error('❌ Redis Sub Error:', err));
+    console.log('🚀 Redis initialization attempted.');
+}
 // --- Centralized Error-Logging Middleware ---
 const errorLogStream = fs_1.default.createWriteStream(path_1.default.join(__dirname, '..', 'error.log'), { flags: 'a' });
 app.use((err, req, res, next) => {
